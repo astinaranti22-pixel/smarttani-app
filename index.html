@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartTani — Catatan Hasil Panen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#1F3B2C;--green:#2E5339;--green-light:#5ae06c;
+  --gold:#D6A23C;--gold-dark:#9C7322;--soil:#7A5430;
+  --ink:#26321F;--ink-soft:#5E6A53;--red:#A6402B;--blue:#2C5F8A;
+  --paper:#FBF8F0;--paper-deep:#EEE5C9;--line:#DCD0AD;--white:#FFFEFA;
+  --shadow:0 2px 14px rgba(38,50,31,.10);--radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper-deep);background-image:radial-gradient(circle at 1px 1px,rgba(38,50,31,.06) 1px,transparent 0);background-size:20px 20px;color:var(--ink);font-family:'Public Sans',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;}
+button,input,select,textarea{font-family:inherit;}
+h1,h2,h3{margin:0;font-family:'Fraunces',serif;}
+:focus-visible{outline:2px solid var(--gold-dark);outline-offset:2px;}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+
+.st-app{max-width:1180px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+.st-header{background:var(--deep);color:var(--paper);display:flex;align-items:center;justify-content:space-between;padding:12px 22px;position:sticky;top:0;z-index:30;box-shadow:var(--shadow);}
+.st-brand{display:flex;align-items:center;gap:12px;}
+.st-brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.st-brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:21px;}
+.st-brand-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);}
+.st-nav-desktop{display:flex;gap:4px;}
+.st-nav-btn{background:transparent;border:1px solid transparent;color:rgba(251,248,240,.78);font-weight:600;font-size:13.5px;padding:8px 15px;border-radius:999px;cursor:pointer;transition:all .15s ease;}
+.st-nav-btn:hover{color:var(--paper);background:rgba(255,255,255,.08);}
+.st-nav-btn.active{background:var(--gold);color:var(--deep);}
+.st-user{position:relative;}
+.st-user-btn{width:38px;height:38px;border-radius:50%;background:var(--green-light);color:var(--paper);border:1.5px solid var(--gold);font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.5px;}
+.st-user-popover{position:absolute;right:0;top:48px;width:260px;background:var(--white);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;display:none;flex-direction:column;gap:10px;z-index:40;}
+.st-user-popover.open{display:flex;}
+.st-user-popover label{font-size:12px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:4px;}
+.st-user-popover input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--paper);}
+.st-popover-divider{height:1px;background:var(--line);margin:4px 0;}
+.st-reset-btn{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;text-align:left;padding:4px 0;font-weight:600;}
+
+.st-nav-mobile{display:none;position:sticky;bottom:0;z-index:30;background:var(--white);border-top:1px solid var(--line);padding:5px 4px calc(5px + env(safe-area-inset-bottom));justify-content:space-around;box-shadow:0 -2px 10px rgba(38,50,31,.08);}
+.st-nav-mobile .st-nav-btn{color:var(--ink-soft);flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:10px;padding:5px 2px;border-radius:10px;}
+.st-nav-mobile .st-nav-btn.active{background:var(--paper-deep);color:var(--green);}
+.st-nav-mobile svg{width:19px;height:19px;}
+
+main{flex:1;padding:28px 24px 60px;}
+.st-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-dark);margin:0 0 6px;}
+.st-title{font-size:28px;font-weight:600;color:var(--deep);margin-bottom:22px;}
+.st-subtitle{font-size:16px;font-weight:600;color:var(--deep);margin:0 0 14px;}
+
+/* STAT CARDS */
+.st-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.st-stat-card{position:relative;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;overflow:hidden;}
+.st-stat-card::after{content:'';position:absolute;top:-14px;right:-14px;width:46px;height:46px;border-radius:50%;border:1.5px dashed var(--line);}
+.st-stat-label{font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-bottom:6px;}
+.st-stat-value{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:var(--deep);}
+.st-tone-gold .st-stat-value{color:var(--gold-dark);}
+.st-tone-soil .st-stat-value{color:var(--soil);}
+.st-tone-red .st-stat-value{color:var(--red);}
+
+/* CHARTS */
+.st-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.st-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+.st-card-title{font-size:15px;font-weight:600;color:var(--deep);margin-bottom:16px;}
+.st-hbar-row{display:grid;grid-template-columns:90px 1fr 78px;align-items:center;gap:10px;margin-bottom:12px;}
+.st-hbar-label{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st-hbar-track{height:12px;background:var(--paper-deep);border-radius:6px;overflow:hidden;}
+.st-hbar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:6px;}
+.st-hbar-value{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);text-align:right;}
+.st-vbar-chart{display:flex;align-items:flex-end;gap:10px;height:150px;}
+.st-vbar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:8px;}
+.st-vbar-wrap{width:100%;height:120px;display:flex;align-items:flex-end;}
+.st-vbar-fill{width:100%;background:linear-gradient(180deg,var(--gold),var(--green));border-radius:6px 6px 2px 2px;min-height:3px;}
+.st-vbar-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);text-transform:capitalize;}
+
+/* FORM */
+.st-form-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+.st-form-main{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:14px;}
+.st-field{display:flex;flex-direction:column;gap:5px;}
+.st-field label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+.st-field input,.st-field select,.st-field textarea{padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14.5px;background:var(--paper);color:var(--ink);}
+.st-field input:focus,.st-field select:focus,.st-field textarea:focus{background:var(--white);border-color:var(--green-light);}
+.st-field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+textarea{resize:vertical;min-height:64px;}
+.st-form-actions{display:flex;gap:10px;margin-top:6px;}
+.st-btn{border:none;border-radius:999px;font-weight:700;font-size:14px;padding:11px 22px;cursor:pointer;transition:transform .1s ease;}
+.st-btn:active{transform:scale(.97);}
+.st-btn-primary{background:var(--green);color:var(--paper);}
+.st-btn-primary:hover{background:var(--deep);}
+.st-btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);}
+.st-btn-ghost:hover{border-color:var(--soil);color:var(--soil);}
+.st-btn-sm{padding:8px 14px;font-size:13px;}
+.st-btn-danger{background:var(--red);color:#fff;}
+
+/* PHOTO */
+.st-photo-upload{border:2px dashed var(--line);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.st-photo-upload:hover{border-color:var(--green-light);}
+.st-photo-upload input{display:none;}
+.st-photo-upload-label{font-size:13px;color:var(--ink-soft);cursor:pointer;}
+.st-photo-preview{position:relative;margin-top:10px;}
+.st-photo-preview img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;}
+.st-photo-remove{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:14px;line-height:1;}
+.st-photo-thumb{width:52px;height:52px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid var(--line);}
+.st-photo-thumb:hover{border-color:var(--gold);}
+
+/* PREVIEW TICKET */
+.st-preview-card{position:relative;background:var(--white);border:1px solid var(--line);border-radius:10px;padding:22px;}
+.st-preview-card::before,.st-preview-card::after{content:'';position:absolute;top:34px;width:18px;height:18px;border-radius:50%;background:var(--paper-deep);border:1px solid var(--line);}
+.st-preview-card::before{left:-9px;}
+.st-preview-card::after{right:-9px;}
+.st-preview-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed var(--line);}
+.st-preview-row strong{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);font-weight:600;}
+.st-preview-total{border-bottom:none;margin-top:2px;}
+.st-preview-total strong{font-size:18px;color:var(--green);}
+.st-preview-total strong.st-neg{color:var(--red);}
+
+/* TABLE */
+.st-filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+.st-filter-bar input,.st-filter-bar select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:var(--white);color:var(--ink);}
+#st-f-search{flex:1;min-width:200px;}
+.st-table-wrap{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);overflow:auto;}
+table.st-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:900px;}
+.st-table thead th{text-align:left;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap;}
+.st-table thead th:hover{color:var(--green);}
+.st-table td{padding:11px 14px;border-bottom:1px solid var(--paper-deep);white-space:nowrap;vertical-align:middle;}
+.st-table tbody tr:last-child td{border-bottom:none;}
+.st-table tbody tr:hover{background:var(--paper);}
+.st-num{font-family:'IBM Plex Mono',monospace;text-align:right;}
+.st-neg{color:var(--red);}
+.st-actions{text-align:right;}
+.st-icon-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:4px 7px;border-radius:7px;}
+.st-icon-btn:hover{background:var(--paper-deep);}
+.st-icon-danger{background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:5px 8px;border-radius:7px;}
+.st-rcard-list{display:none;flex-direction:column;gap:12px;}
+.st-rcard{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:15px;}
+.st-rcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.st-rcard-top strong{font-size:15px;display:block;}
+.st-rcard-sub{font-size:12px;color:var(--ink-soft);}
+.st-rcard-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.st-rcard-grid span{display:block;font-size:11px;color:var(--ink-soft);}
+.st-rcard-grid strong{font-family:'IBM Plex Mono',monospace;font-size:13.5px;}
+.st-rcard-note{margin:10px 0 0;font-size:12.5px;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:8px;}
+
+/* TARGET */
+.st-target-layout{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;}
+.st-target-form{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px;}
+.st-target-list{display:flex;flex-direction:column;gap:12px;}
+.st-target-card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px;}
+.st-target-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.st-target-name{font-weight:700;font-size:15px;color:var(--deep);}
+.st-target-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.st-target-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.st-target-row span{font-size:13px;color:var(--ink-soft);}
+.st-target-row strong{font-family:'IBM Plex Mono',monospace;font-size:13px;}
+.st-progress-wrap{margin-top:4px;}
+.st-progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-bottom:4px;}
+.st-progress-track{height:10px;background:var(--paper-deep);border-radius:5px;overflow:hidden;}
+.st-progress-fill{height:100%;border-radius:5px;transition:width .4s ease;}
+.st-progress-ok{background:linear-gradient(90deg,var(--green),var(--gold));}
+.st-progress-warn{background:var(--soil);}
+.st-progress-over{background:var(--gold-dark);}
+
+/* KALENDER */
+.st-kal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.st-kal-nav{background:none;border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:16px;color:var(--ink);}
+.st-kal-nav:hover{background:var(--paper-deep);}
+.st-kal-month{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--deep);}
+.st-kal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.st-kal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--ink-soft);padding:6px 0;letter-spacing:.5px;}
+.st-kal-cell{min-height:68px;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:6px;cursor:pointer;transition:background .1s;}
+.st-kal-cell:hover{background:var(--paper);}
+.st-kal-cell.st-kal-empty{background:transparent;border:none;cursor:default;}
+.st-kal-cell.st-kal-today{border-color:var(--gold);background:rgba(214,162,60,.06);}
+.st-kal-cell.st-kal-selected{background:var(--paper-deep);border-color:var(--green);}
+.st-kal-cell.st-kal-other{opacity:.4;}
+.st-kal-date{font-size:12.5px;font-weight:600;color:var(--ink);}
+.st-kal-cell.st-kal-today .st-kal-date{color:var(--gold-dark);}
+.st-kal-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+.st-kal-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.st-kal-dot-harvest{background:var(--green);}
+.st-kal-dot-tanam{background:var(--blue);}
+.st-kal-dot-panen{background:var(--gold-dark);}
+.st-kal-detail{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:16px;}
+.st-kal-detail h3{margin:0 0 12px;font-size:15px;color:var(--deep);}
+.st-kal-event{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);}
+.st-kal-event:last-child{border-bottom:none;}
+.st-kal-badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;}
+.st-kal-badge-harvest{background:rgba(46,83,57,.12);color:var(--green);}
+.st-kal-badge-tanam{background:rgba(44,95,138,.12);color:var(--blue);}
+.st-kal-badge-panen{background:rgba(214,162,60,.15);color:var(--gold-dark);}
+.st-kal-event-info{font-size:13px;line-height:1.5;}
+.st-jadwal-form{background:var(--paper);border-radius:10px;padding:14px;margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+.st-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+.st-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);}
+
+/* EMPTY STATE */
+.st-empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+.st-empty-state h3{color:var(--deep);font-size:18px;margin-bottom:6px;}
+.st-empty-state p{font-size:14px;margin:0 0 16px;}
+
+/* TOAST */
+.st-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--deep);color:var(--paper);padding:11px 20px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);transition:all .25s ease;z-index:60;pointer-events:none;}
+.st-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* PHOTO MODAL */
+.st-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;}
+.st-modal-overlay.hidden{display:none;}
+.st-modal-content{max-width:700px;width:100%;max-height:90vh;background:var(--white);border-radius:16px;overflow:hidden;position:relative;}
+.st-modal-img{width:100%;max-height:80vh;object-fit:contain;display:block;background:#000;}
+.st-modal-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;line-height:1;}
+.st-modal-caption{padding:12px 16px;font-size:13px;color:var(--ink-soft);}
+
+/* PRINT */
+.st-print-header{display:none;}
+@media print{
+  .st-header,.st-nav-mobile,.st-filter-bar,.st-actions,.st-chart-grid,
+  #st-export-csv,#st-print-btn,.st-btn{display:none!important;}
+  .st-table-wrap{display:block!important;overflow:visible;box-shadow:none;border:none;}
+  .st-rcard-list{display:none!important;}
+  body{background:white;background-image:none;}
+  .st-print-header{display:block;margin-bottom:20px;}
+  .st-print-header h1{font-size:20px;color:#1F3B2C;}
+  .st-print-header p{font-size:12px;color:#666;margin:4px 0 0;}
+  .st-stat-grid{grid-template-columns:repeat(4,1fr);}
+  .st-stat-card{border:1px solid #ccc;break-inside:avoid;}
+}
+
+.st-loading{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14px;}
+.st-section-sep{height:1px;background:var(--line);margin:28px 0;}
+
+@media(max-width:900px){
+  .st-stat-grid{grid-template-columns:1fr 1fr;}
+  .st-chart-grid{grid-template-columns:1fr;}
+  .st-form-grid{grid-template-columns:1fr;}
+  .st-target-layout{grid-template-columns:1fr;}
+}
+@media(max-width:720px){
+  .st-nav-desktop{display:none;}
+  .st-nav-mobile{display:flex;}
+  main{padding:16px 14px 28px;}
+  .st-title{font-size:22px;}
+  .st-table-wrap{display:none;}
+  .st-rcard-list{display:flex;}
+  .st-brand-tag{display:none;}
+  .st-kal-cell{min-height:52px;}
+}
+</style>
+</head>
+<body>
+<div class="st-app">
+
+<header class="st-header">
+  <div class="st-brand">
+    <svg width="42" height="42" viewBox="0 0 44 44" aria-hidden="true">
+      <circle cx="22" cy="22" r="20" fill="none" stroke="#D6A23C" stroke-width="1.4" stroke-dasharray="2.4 2.6"/>
+      <circle cx="22" cy="22" r="15.5" fill="none" stroke="#D6A23C" stroke-width="1"/>
+      <path d="M22 30.5c-5.2-1-8.3-5.6-8.3-10.7 0-3 1.2-5.7 2-7.1.6 2 2 4.5 4.2 6.1.3-2.4 1.6-5.1 3.7-6.9 1 2.4 1.2 5.1.6 7.5 1.6-1 3-2.6 3.9-4.5.9 1.7 1.4 3.9 1 6.1-.5 4.9-3.7 8.7-7.1 9.5z" fill="#D6A23C"/>
+    </svg>
+    <div class="st-brand-text">
+      <span class="st-brand-name">SmartTani</span>
+      <span class="st-brand-tag">Catatan Hasil Panen</span>
+    </div>
+  </div>
+  <nav class="st-nav-desktop">
+    <button class="st-nav-btn" data-tab="dashboard">Ringkasan</button>
+    <button class="st-nav-btn" data-tab="catat">Catat Panen</button>
+    <button class="st-nav-btn" data-tab="target">Target &amp; Realisasi</button>
+    <button class="st-nav-btn" data-tab="kalender">Kalender</button>
+    <button class="st-nav-btn" data-tab="riwayat">Riwayat</button>
+  </nav>
+  <div class="st-user">
+    <button id="st-user-btn" class="st-user-btn" title="Profil">…</button>
+    <div id="st-user-popover" class="st-user-popover">
+      <div><label for="st-input-name">Nama Anda</label><input id="st-input-name" type="text" placeholder="cth. Budi Santoso"></div>
+      <div><label for="st-input-group">Nama Kelompok Tani</label><input id="st-input-group" type="text" placeholder="cth. Kelompok Tani Makmur"></div>
+      <button id="st-save-profile" class="st-btn st-btn-primary st-btn-sm">Simpan Profil</button>
+      <div class="st-popover-divider"></div>
+      <button id="st-reset-data" class="st-reset-btn">⚠ Hapus semua data panen…</button>
+    </div>
+  </div>
+</header>
+
+<main id="st-main"><div class="st-loading">Memuat data SmartTani…</div></main>
+
+<nav class="st-nav-mobile">
+  <button class="st-nav-btn" data-tab="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h4v8H3zM10 8h4v13h-4zM17 3h4v18h-4z"/></svg>Ringkasan</button>
+  <button class="st-nav-btn" data-tab="catat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Catat</button>
+  <button class="st-nav-btn" data-tab="target"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Target</button>
+  <button class="st-nav-btn" data-tab="kalender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Kalender</button>
+  <button class="st-nav-btn" data-tab="riwayat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Riwayat</button>
+</nav>
+
+<div id="st-toast" class="st-toast" hidden></div>
+<div id="st-photo-modal" class="st-modal-overlay hidden">
+  <div class="st-modal-content">
+    <img id="st-modal-img" src="" alt="Foto panen" class="st-modal-img">
+    <div class="st-modal-caption" id="st-modal-caption"></div>
+    <button class="st-modal-close" id="st-modal-close">×</button>
+  </div>
+</div>
+
+</div><!-- .st-app -->
+<script>
+(function(){
+"use strict";
+
+// ====== STATE ======
+var S = {
+  records:[],targets:[],jadwal:[],
+  profile:{name:''},settings:{groupName:''},
+  tab:'dashboard',
+  editingId:null,editingTargetId:null,editingJadwalId:null,
+  filters:{q:'',tanaman:'',lahan:'',from:'',to:''},
+  sort:{key:'tanggal',dir:'desc'},
+  kalYear:new Date().getFullYear(),kalMonth:new Date().getMonth(),
+  kalSelected:null,
+  storageOk:true,pendingPhoto:null,
+  addingJadwal:false
+};
+
+// ====== HELPERS ======
+function H(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+function fRp(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n||0);}
+function fRpS(n){n=n||0;if(n>=1e9)return'Rp '+(n/1e9).toFixed(1).replace('.0','')+'M';if(n>=1e6)return'Rp '+(n/1e6).toFixed(1).replace('.0','')+'jt';if(n>=1e3)return'Rp '+Math.round(n/1e3)+'rb';return'Rp '+Math.round(n);}
+function fNum(n){return new Intl.NumberFormat('id-ID').format(n||0);}
+function fDate(iso){if(!iso)return'-';var d=new Date(iso+'T00:00:00');return isNaN(d.getTime())?iso:d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+function fMonth(y,m){return new Date(y,m,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});}
+function todayISO(){var d=new Date(),off=d.getTimezoneOffset(),l=new Date(d.getTime()-off*60000);return l.toISOString().slice(0,10);}
+function uid(){return 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function uniq(arr,key){var s={};arr.forEach(function(r){if(r[key])s[r[key]]=1;});return Object.keys(s).sort(function(a,b){return a.localeCompare(b,'id');});}
+function pendOf(r){return(r.jumlah||0)*(r.hargaJual||0);}
+function untOf(r){return pendOf(r)-(r.biaya||0);}
+function pct(a,b){if(!b)return 0;return Math.min(Math.round(a/b*100),999);}
+
+// ====== STORAGE ======
+function hasStor(){return typeof window.storage!=='undefined'&&window.storage;}
+function loadAll(){
+  if(!hasStor()){S.storageOk=false;return Promise.resolve();}
+  var ops=[
+    window.storage.get('smt-records',true).then(function(r){try{S.records=r?JSON.parse(r.value):[];}catch(e){S.records=[];}}).catch(function(){S.records=[];}),
+    window.storage.get('smt-targets',true).then(function(r){try{S.targets=r?JSON.parse(r.value):[];}catch(e){S.targets=[];}}).catch(function(){S.targets=[];}),
+    window.storage.get('smt-jadwal',true).then(function(r){try{S.jadwal=r?JSON.parse(r.value):[];}catch(e){S.jadwal=[];}}).catch(function(){S.jadwal=[];}),
+    window.storage.get('smt-profile',false).then(function(r){try{S.profile=r?JSON.parse(r.value):{name:''};}catch(e){S.profile={name:''};}}).catch(function(){S.profile={name:''};}),
+    window.storage.get('smt-settings',true).then(function(r){try{S.settings=r?JSON.parse(r.value):{groupName:''};}catch(e){S.settings={groupName:''};}}).catch(function(){S.settings={groupName:''};}),
+  ];
+  return Promise.all(ops);
+}
+function saveRecords(){if(hasStor())window.storage.set('smt-records',JSON.stringify(S.records),true);}
+function saveTargets(){if(hasStor())window.storage.set('smt-targets',JSON.stringify(S.targets),true);}
+function saveJadwal(){if(hasStor())window.storage.set('smt-jadwal',JSON.stringify(S.jadwal),true);}
+function saveProfile(){if(hasStor())window.storage.set('smt-profile',JSON.stringify(S.profile),false);}
+function saveSettings(){if(hasStor())window.storage.set('smt-settings',JSON.stringify(S.settings),true);}
+function savePhoto(id,data){if(hasStor())window.storage.set('smt-photo-'+id,data,true);}
+function loadPhoto(id){if(!hasStor())return Promise.resolve(null);return window.storage.get('smt-photo-'+id,true).then(function(r){return r?r.value:null;}).catch(function(){return null;});}
+function deletePhoto(id){if(hasStor())window.storage.delete('smt-photo-'+id,true).catch(function(){});}
+
+// ====== PHOTO RESIZE ======
+function resizePhoto(file,cb){
+  var fr=new FileReader();
+  fr.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var max=480,w=img.width,h=img.height;
+      if(w>h){if(w>max){h=h*max/w;w=max;}}else{if(h>max){w=w*max/h;h=max;}}
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      cb(cv.toDataURL('image/jpeg',0.72));
+    };
+    img.src=e.target.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+// ====== DUMMY DATA ======
+function seedDummy(){
+  S.settings.groupName='Kelompok Tani Sumber Makmur';
+  var seed=[
+    {tanggal:'2026-01-15',tanaman:'Padi',lahan:'Sawah Utara',jumlah:1200,satuan:'kg',biaya:800000,hargaJual:5500,dicatatOleh:'Budi Santoso',catatan:'Kualitas baik, cuaca mendukung'},
+    {tanggal:'2026-01-28',tanaman:'Cabai Merah',lahan:'Petak A1',jumlah:85,satuan:'kg',biaya:350000,hargaJual:35000,dicatatOleh:'Siti Rahayu',catatan:'Harga pasar naik'},
+    {tanggal:'2026-02-10',tanaman:'Jagung',lahan:'Petak A2',jumlah:650,satuan:'kg',biaya:420000,hargaJual:4200,dicatatOleh:'Ahmad Fauzi',catatan:''},
+    {tanggal:'2026-02-22',tanaman:'Tomat',lahan:'Kebun Timur',jumlah:320,satuan:'kg',biaya:280000,hargaJual:8000,dicatatOleh:'Dewi Lestari',catatan:'Perlu perbaikan irigasi'},
+    {tanggal:'2026-03-05',tanaman:'Padi',lahan:'Sawah Utara',jumlah:980,satuan:'kg',biaya:750000,hargaJual:5500,dicatatOleh:'Budi Santoso',catatan:''},
+    {tanggal:'2026-03-18',tanaman:'Cabai Merah',lahan:'Petak A1',jumlah:120,satuan:'kg',biaya:400000,hargaJual:38000,dicatatOleh:'Siti Rahayu',catatan:'Panen raya'},
+    {tanggal:'2026-03-27',tanaman:'Kacang Panjang',lahan:'Kebun Timur',jumlah:95,satuan:'kg',biaya:180000,hargaJual:12000,dicatatOleh:'Ahmad Fauzi',catatan:''},
+    {tanggal:'2026-04-08',tanaman:'Jagung',lahan:'Petak A2',jumlah:720,satuan:'kg',biaya:480000,hargaJual:4500,dicatatOleh:'Dewi Lestari',catatan:''},
+    {tanggal:'2026-04-20',tanaman:'Tomat',lahan:'Petak A1',jumlah:410,satuan:'kg',biaya:310000,hargaJual:9000,dicatatOleh:'Siti Rahayu',catatan:'Harga tinggi bulan ini'},
+    {tanggal:'2026-04-30',tanaman:'Padi',lahan:'Sawah Utara',jumlah:1100,satuan:'kg',biaya:820000,hargaJual:5800,dicatatOleh:'Budi Santoso',catatan:''},
+    {tanggal:'2026-05-12',tanaman:'Cabai Merah',lahan:'Kebun Timur',jumlah:95,satuan:'kg',biaya:380000,hargaJual:42000,dicatatOleh:'Dewi Lestari',catatan:'Harga tertinggi tahun ini'},
+    {tanggal:'2026-05-25',tanaman:'Kacang Panjang',lahan:'Petak A2',jumlah:110,satuan:'kg',biaya:200000,hargaJual:13000,dicatatOleh:'Ahmad Fauzi',catatan:''},
+    {tanggal:'2026-06-03',tanaman:'Jagung',lahan:'Petak A2',jumlah:800,satuan:'kg',biaya:510000,hargaJual:4800,dicatatOleh:'Ahmad Fauzi',catatan:''},
+    {tanggal:'2026-06-10',tanaman:'Tomat',lahan:'Kebun Timur',jumlah:380,satuan:'kg',biaya:290000,hargaJual:9500,dicatatOleh:'Dewi Lestari',catatan:''},
+    {tanggal:'2026-06-18',tanaman:'Padi',lahan:'Sawah Utara',jumlah:1050,satuan:'kg',biaya:780000,hargaJual:5800,dicatatOleh:'Budi Santoso',catatan:'Musim kering berdampak sedikit'},
+  ];
+  seed.forEach(function(d){d.id=uid();d.createdAt=Date.now();d.hasPhoto=false;});
+  S.records=seed;
+
+  S.targets=[
+    {id:uid(),tanaman:'Padi',lahan:'Sawah Utara',periode:'2026',jumlahTarget:5000,satuan:'kg',pendapatanTarget:28000000},
+    {id:uid(),tanaman:'Cabai Merah',lahan:'',periode:'2026',jumlahTarget:400,satuan:'kg',pendapatanTarget:15000000},
+    {id:uid(),tanaman:'Jagung',lahan:'Petak A2',periode:'2026',jumlahTarget:2500,satuan:'kg',pendapatanTarget:11500000},
+    {id:uid(),tanaman:'Tomat',lahan:'',periode:'2026-06',jumlahTarget:500,satuan:'kg',pendapatanTarget:4500000},
+  ];
+
+  S.jadwal=[
+    {id:uid(),tanaman:'Padi',lahan:'Petak A1',tanggalTanam:'2026-06-25',estimasiPanen:'2026-10-15',catatan:'Varietas Ciherang'},
+    {id:uid(),tanaman:'Cabai Merah',lahan:'Kebun Timur',tanggalTanam:'2026-07-01',estimasiPanen:'2026-09-01',catatan:''},
+    {id:uid(),tanaman:'Jagung',lahan:'Petak A2',tanggalTanam:'2026-07-05',estimasiPanen:'2026-09-10',catatan:'Varietas Bisi-18'},
+    {id:uid(),tanaman:'Tomat',lahan:'Sawah Utara',tanggalTanam:'2026-06-28',estimasiPanen:'2026-08-28',catatan:''},
+  ];
+
+  saveRecords();saveTargets();saveJadwal();saveSettings();
+}
+
+// ====== UPSERT / DELETE ======
+function upsertRecord(data){
+  if(S.editingId){
+    var idx=-1;S.records.forEach(function(r,i){if(r.id===S.editingId)idx=i;});
+    if(idx>-1)S.records[idx]=Object.assign({},S.records[idx],data);
+  }else{
+    data.id=uid();data.createdAt=Date.now();
+    S.records.push(data);
+  }
+  S.editingId=null;saveRecords();
+}
+function deleteRecord(id){deletePhoto(id);S.records=S.records.filter(function(r){return r.id!==id;});saveRecords();}
+function upsertTarget(data){
+  if(S.editingTargetId){
+    var idx=-1;S.targets.forEach(function(t,i){if(t.id===S.editingTargetId)idx=i;});
+    if(idx>-1)S.targets[idx]=Object.assign({},S.targets[idx],data);
+  }else{
+    data.id=uid();S.targets.push(data);
+  }
+  S.editingTargetId=null;saveTargets();
+}
+function deleteTarget(id){S.targets=S.targets.filter(function(t){return t.id!==id;});saveTargets();}
+function upsertJadwal(data){
+  if(S.editingJadwalId){
+    var idx=-1;S.jadwal.forEach(function(j,i){if(j.id===S.editingJadwalId)idx=i;});
+    if(idx>-1)S.jadwal[idx]=Object.assign({},S.jadwal[idx],data);
+  }else{
+    data.id=uid();S.jadwal.push(data);
+  }
+  S.editingJadwalId=null;saveJadwal();
+}
+function deleteJadwal(id){S.jadwal=S.jadwal.filter(function(j){return j.id!==id;});saveJadwal();}
+
+// ====== STATS ======
+function computeStats(records){
+  var totalPend=0,totalBiaya=0;
+  records.forEach(function(r){totalPend+=pendOf(r);totalBiaya+=(r.biaya||0);});
+  return{totalPend:totalPend,totalBiaya:totalBiaya,totalUntung:totalPend-totalBiaya,count:records.length};
+}
+function pendapatanPerTanaman(records){
+  var m={};records.forEach(function(r){m[r.tanaman]=(m[r.tanaman]||0)+pendOf(r);});
+  return Object.keys(m).map(function(k){return[k,m[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+}
+function trenBulanan(records){
+  var now=new Date(),months=[];
+  for(var i=5;i>=0;i--){
+    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),label:d.toLocaleDateString('id-ID',{month:'short'}),value:0});
+  }
+  records.forEach(function(r){
+    if(!r.tanggal)return;
+    var d=new Date(r.tanggal);if(isNaN(d))return;
+    var key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    months.forEach(function(m){if(m.key===key)m.value+=pendOf(r);});
+  });
+  return months;
+}
+function targetActual(t){
+  var matching=S.records.filter(function(r){
+    if(r.tanaman!==t.tanaman)return false;
+    if(t.lahan&&r.lahan!==t.lahan)return false;
+    if(t.periode.length===7)return r.tanggal&&r.tanggal.slice(0,7)===t.periode;
+    return r.tanggal&&r.tanggal.slice(0,4)===t.periode;
+  });
+  var aJ=matching.reduce(function(s,r){return s+(r.jumlah||0);},0);
+  var aP=matching.reduce(function(s,r){return s+pendOf(r);},0);
+  return{jumlah:aJ,pendapatan:aP};
+}
+
+// ====== CHART HELPERS ======
+function hBarChart(data){
+  if(!data.length)return'<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:20px">Belum ada data</div>';
+  var max=Math.max.apply(null,data.map(function(d){return d[1];}).concat([1]));
+  return data.map(function(d){
+    return'<div class="st-hbar-row"><div class="st-hbar-label">'+H(d[0])+'</div><div class="st-hbar-track"><div class="st-hbar-fill" style="width:'+Math.max(d[1]/max*100,3)+'%"></div></div><div class="st-hbar-value">'+fRpS(d[1])+'</div></div>';
+  }).join('');
+}
+function vBarChart(data){
+  var max=Math.max.apply(null,data.map(function(d){return d.value;}).concat([1]));
+  return'<div class="st-vbar-chart">'+data.map(function(d){
+    return'<div class="st-vbar-col"><div class="st-vbar-wrap"><div class="st-vbar-fill" style="height:'+Math.max(d.value/max*100,3)+'%" title="'+fRp(d.value)+'"></div></div><div class="st-vbar-label">'+H(d.label)+'</div></div>';
+  }).join('')+'</div>';
+}
+
+// ====== RENDER: DASHBOARD ======
+function renderDashboard(){
+  var st=computeStats(S.records);
+  var gn=S.settings.groupName?H(S.settings.groupName):'Kelompok Tani';
+  function sCard(label,val,tone){return'<div class="st-stat-card st-tone-'+tone+'"><div class="st-stat-label">'+label+'</div><div class="st-stat-value">'+val+'</div></div>';}
+  var html='<p class="st-eyebrow">RINGKASAN HASIL PANEN</p><h2 class="st-title">Ringkasan '+gn+'</h2>';
+  html+='<div class="st-stat-grid">';
+  html+=sCard('Total Pendapatan',fRp(st.totalPend),'gold');
+  html+=sCard('Total Biaya Produksi',fRp(st.totalBiaya),'soil');
+  html+=sCard('Estimasi Keuntungan',fRp(st.totalUntung),st.totalUntung>=0?'green':'red');
+  html+=sCard('Jumlah Catatan',fNum(st.count),'green');
+  html+='</div>';
+  if(!st.count){
+    html+='<div class="st-empty-state"><h3>Ladang catatan masih kosong 🌱</h3><p>Mulai catat hasil panen pertama kelompok tani Anda.</p><button class="st-btn st-btn-primary" data-action="go-catat">+ Catat Panen Pertama</button></div>';
+  }else{
+    html+='<div class="st-chart-grid">';
+    html+='<div class="st-card"><h3 class="st-card-title">Pendapatan per Tanaman</h3>'+hBarChart(pendapatanPerTanaman(S.records))+'</div>';
+    html+='<div class="st-card"><h3 class="st-card-title">Tren Pendapatan 6 Bulan Terakhir</h3>'+vBarChart(trenBulanan(S.records))+'</div>';
+    html+='</div>';
+  }
+  return html;
+}
+
+// ====== RENDER: FORM ======
+function renderCatatForm(){
+  var editing=S.editingId?S.records.filter(function(r){return r.id===S.editingId;})[0]:null;
+  var d=editing||{tanggal:todayISO(),tanaman:'',lahan:'',jumlah:'',satuan:'kg',biaya:'',hargaJual:'',dicatatOleh:S.profile.name||'',catatan:'',hasPhoto:false};
+  var tOpts=uniq(S.records,'tanaman');
+  var lOpts=uniq(S.records,'lahan');
+  var satuanList=['kg','kuintal','ton','karung','ikat','liter'];
+  var html='<p class="st-eyebrow">CATAT</p><h2 class="st-title">'+(editing?'Ubah Catatan Panen':'Tambah Catatan Panen')+'</h2>';
+  html+='<form id="st-form" class="st-form-grid">';
+  html+='<div class="st-form-main">';
+  html+='<div class="st-field"><label for="f-tgl">Tanggal Panen</label><input required type="date" id="f-tgl" name="tanggal" value="'+H(d.tanggal)+'"></div>';
+  html+='<div class="st-field"><label for="f-tan">Tanaman</label><input required list="dl-tan" id="f-tan" name="tanaman" placeholder="cth. Padi, Cabai" value="'+H(d.tanaman)+'"><datalist id="dl-tan">'+tOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div>';
+  html+='<div class="st-field"><label for="f-lah">Lahan / Petak</label><input required list="dl-lah" id="f-lah" name="lahan" placeholder="cth. Petak A1" value="'+H(d.lahan)+'"><datalist id="dl-lah">'+lOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div>';
+  html+='<div class="st-field-row">';
+  html+='<div class="st-field"><label for="f-jml">Jumlah Hasil</label><input required type="number" min="0" step="any" id="f-jml" name="jumlah" value="'+H(d.jumlah)+'"></div>';
+  html+='<div class="st-field"><label for="f-sat">Satuan</label><select id="f-sat" name="satuan">'+satuanList.map(function(u){return'<option '+(d.satuan===u?'selected':'')+'>'+u+'</option>';}).join('')+'</select></div>';
+  html+='</div>';
+  html+='<div class="st-field-row">';
+  html+='<div class="st-field"><label for="f-biaya">Biaya Produksi (Rp)</label><input type="number" min="0" step="any" id="f-biaya" name="biaya" placeholder="0" value="'+H(d.biaya)+'"></div>';
+  html+='<div class="st-field"><label for="f-harga">Harga Jual / Satuan (Rp)</label><input type="number" min="0" step="any" id="f-harga" name="hargaJual" placeholder="0" value="'+H(d.hargaJual)+'"></div>';
+  html+='</div>';
+  html+='<div class="st-field"><label for="f-oleh">Dicatat oleh</label><input type="text" id="f-oleh" name="dicatatOleh" placeholder="Nama Anda" value="'+H(d.dicatatOleh)+'"></div>';
+  html+='<div class="st-field"><label>Foto Hasil Panen</label>';
+  html+='<div class="st-photo-upload" id="photo-upload-area"><input type="file" id="f-foto" accept="image/*"><label for="f-foto" class="st-photo-upload-label">📷 Klik untuk unggah foto<br><small>JPG/PNG, maks 5MB</small></label></div>';
+  html+='<div id="photo-preview-wrap">'+(d.hasPhoto?'<div class="st-photo-preview" id="photo-preview"><img id="photo-preview-img" src="" alt="Foto panen"><button type="button" class="st-photo-remove" id="photo-remove">×</button></div>':'')+'</div>';
+  html+='</div>';
+  html+='<div class="st-field"><label for="f-cat">Catatan (opsional)</label><textarea id="f-cat" name="catatan" rows="3" placeholder="cth. cuaca, kualitas, kendala...">'+H(d.catatan)+'</textarea></div>';
+  html+='<div class="st-form-actions">';
+  html+='<button type="submit" class="st-btn st-btn-primary">'+(editing?'Simpan Perubahan':'Simpan Catatan')+'</button>';
+  if(editing)html+='<button type="button" id="st-cancel-edit" class="st-btn st-btn-ghost">Batal</button>';
+  html+='</div></div>';
+  html+='<aside class="st-preview-card"><h3 class="st-card-title">Ringkasan Hitung</h3>';
+  html+='<div class="st-preview-row"><span>Total Pendapatan</span><strong id="pv-pend">'+fRp(0)+'</strong></div>';
+  html+='<div class="st-preview-row"><span>Biaya Produksi</span><strong id="pv-biaya">'+fRp(0)+'</strong></div>';
+  html+='<div class="st-preview-row st-preview-total"><span>Estimasi Keuntungan</span><strong id="pv-untung">'+fRp(0)+'</strong></div>';
+  html+='</aside></form>';
+  return html;
+}
+
+function attachFormListeners(){
+  var form=document.getElementById('st-form');if(!form)return;
+  var editing=S.editingId?S.records.filter(function(r){return r.id===S.editingId;})[0]:null;
+  S.pendingPhoto=null;
+
+  // Load existing photo if editing
+  if(editing&&editing.hasPhoto){
+    loadPhoto(editing.id).then(function(data){
+      if(data){
+        var img=document.getElementById('photo-preview-img');
+        if(img){img.src=data;}
+        S.pendingPhoto=data;
+      }
+    });
+  }
+
+  // Preview calc
+  function updatePreview(){
+    var jml=parseFloat(document.getElementById('f-jml').value)||0;
+    var biaya=parseFloat(document.getElementById('f-biaya').value)||0;
+    var harga=parseFloat(document.getElementById('f-harga').value)||0;
+    var pend=jml*harga,untung=pend-biaya;
+    document.getElementById('pv-pend').textContent=fRp(pend);
+    document.getElementById('pv-biaya').textContent=fRp(biaya);
+    var u=document.getElementById('pv-untung');
+    u.textContent=fRp(untung);u.classList.toggle('st-neg',untung<0);
+  }
+  ['f-jml','f-biaya','f-harga'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',updatePreview);});
+  updatePreview();
+
+  // Photo upload
+  var fotoInput=document.getElementById('f-foto');
+  if(fotoInput){
+    fotoInput.addEventListener('change',function(){
+      var file=fotoInput.files[0];
+      if(!file)return;
+      if(file.size>5*1024*1024){showToast('Foto terlalu besar (maks 5MB)');return;}
+      resizePhoto(file,function(data){
+        S.pendingPhoto=data;
+        var wrap=document.getElementById('photo-preview-wrap');
+        wrap.innerHTML='<div class="st-photo-preview" id="photo-preview"><img id="photo-preview-img" src="'+data+'" alt="Foto panen"><button type="button" class="st-photo-remove" id="photo-remove">×</button></div>';
+        var rm=document.getElementById('photo-remove');
+        if(rm)rm.addEventListener('click',function(){S.pendingPhoto=null;wrap.innerHTML='';fotoInput.value='';});
+      });
+    });
+  }
+
+  // Photo remove (existing photo)
+  var rmBtn=document.getElementById('photo-remove');
+  if(rmBtn)rmBtn.addEventListener('click',function(){
+    S.pendingPhoto=null;
+    var wrap=document.getElementById('photo-preview-wrap');
+    wrap.innerHTML='';
+    if(fotoInput)fotoInput.value='';
+  });
+
+  // Cancel edit
+  var cancelBtn=document.getElementById('st-cancel-edit');
+  if(cancelBtn)cancelBtn.addEventListener('click',function(){S.editingId=null;renderTab();});
+
+  // Submit
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var fd=new FormData(form);
+    var data={
+      tanggal:fd.get('tanggal'),
+      tanaman:String(fd.get('tanaman')||'').trim(),
+      lahan:String(fd.get('lahan')||'').trim(),
+      jumlah:parseFloat(fd.get('jumlah'))||0,
+      satuan:fd.get('satuan'),
+      biaya:parseFloat(fd.get('biaya'))||0,
+      hargaJual:parseFloat(fd.get('hargaJual'))||0,
+      dicatatOleh:String(fd.get('dicatatOleh')||'').trim(),
+      catatan:String(fd.get('catatan')||'').trim(),
+      hasPhoto:!!S.pendingPhoto
+    };
+    if(!data.tanggal||!data.tanaman||!data.lahan||!data.jumlah){showToast('Lengkapi tanggal, tanaman, lahan, dan jumlah.');return;}
+    if(data.dicatatOleh){S.profile.name=data.dicatatOleh;saveProfile();}
+    var wasEditing=!!S.editingId;
+    var prevId=S.editingId;
+    upsertRecord(data);
+    // Save photo
+    var newId=wasEditing?prevId:S.records[S.records.length-1].id;
+    if(S.pendingPhoto)savePhoto(newId,S.pendingPhoto);
+    else if(wasEditing&&!S.pendingPhoto)deletePhoto(newId);
+    showToast(wasEditing?'Perubahan disimpan ✓':'Catatan tersimpan ✓');
+    S.tab=wasEditing?'riwayat':'catat';
+    if(!wasEditing){S.editingId=null;}
+    renderTab();
+  });
+}
+
+// ====== RENDER: TARGET ======
+function renderTarget(){
+  var tOpts=uniq(S.records,'tanaman');
+  var lOpts=uniq(S.records,'lahan');
+  var editing=S.editingTargetId?S.targets.filter(function(t){return t.id===S.editingTargetId;})[0]:null;
+  var ed=editing||{tanaman:'',lahan:'',periode:new Date().getFullYear().toString(),jumlahTarget:'',satuan:'kg',pendapatanTarget:''};
+  var html='<p class="st-eyebrow">TARGET &amp; REALISASI</p><h2 class="st-title">Target Panen</h2>';
+  html+='<div class="st-target-layout">';
+  // Form
+  html+='<div class="st-target-form">';
+  html+='<h3 class="st-subtitle">'+(editing?'Ubah Target':'Tambah Target')+'</h3>';
+  html+='<div class="st-field"><label>Tanaman</label><input list="dl-tan2" id="tf-tan" placeholder="cth. Padi" value="'+H(ed.tanaman)+'"><datalist id="dl-tan2">'+tOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div>';
+  html+='<div class="st-field"><label>Lahan (opsional)</label><input list="dl-lah2" id="tf-lah" placeholder="Kosongkan = semua lahan" value="'+H(ed.lahan)+'"><datalist id="dl-lah2">'+lOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div>';
+  html+='<div class="st-field"><label>Periode</label><input id="tf-per" placeholder="cth. 2026 atau 2026-06" value="'+H(ed.periode)+'" pattern="[0-9]{4}(-[0-9]{2})?"></div>';
+  html+='<div class="st-field-row"><div class="st-field"><label>Target Jumlah</label><input type="number" min="0" id="tf-jml" value="'+H(ed.jumlahTarget)+'"></div><div class="st-field"><label>Satuan</label><select id="tf-sat">'+['kg','kuintal','ton','karung','ikat','liter'].map(function(u){return'<option '+(ed.satuan===u?'selected':'')+'>'+u+'</option>';}).join('')+'</select></div></div>';
+  html+='<div class="st-field"><label>Target Pendapatan (Rp)</label><input type="number" min="0" id="tf-pend" value="'+H(ed.pendapatanTarget)+'"></div>';
+  html+='<div class="st-form-actions"><button id="st-target-save" class="st-btn st-btn-primary st-btn-sm">'+(editing?'Simpan Perubahan':'Tambah Target')+'</button>';
+  if(editing)html+='<button id="st-target-cancel" class="st-btn st-btn-ghost st-btn-sm">Batal</button>';
+  html+='</div></div>';
+  // List
+  html+='<div class="st-target-list" id="st-target-list">';
+  if(!S.targets.length){html+='<div class="st-empty-state" style="padding:30px 10px"><h3>Belum ada target</h3><p>Tambahkan target panen di sebelah kiri.</p></div>';}
+  else{
+    S.targets.forEach(function(t){
+      var a=targetActual(t);
+      var pJ=pct(a.jumlah,t.jumlahTarget);
+      var pP=pct(a.pendapatan,t.pendapatanTarget);
+      var cJ=pJ>=100?'st-progress-over':pJ>=70?'st-progress-ok':'st-progress-warn';
+      var cP=pP>=100?'st-progress-over':pP>=70?'st-progress-ok':'st-progress-warn';
+      html+='<div class="st-target-card">';
+      html+='<div class="st-target-header"><div><div class="st-target-name">'+H(t.tanaman)+(t.lahan?' — '+H(t.lahan):'')+'</div><div class="st-target-sub">Periode: '+H(t.periode)+'</div></div>';
+      html+='<div><button class="st-icon-btn" data-action="edit-target" data-id="'+t.id+'">✎</button><button class="st-icon-btn" data-action="del-target" data-id="'+t.id+'" data-confirm="0">🗑</button></div></div>';
+      html+='<div class="st-target-row"><span>Jumlah: '+fNum(a.jumlah)+' / '+fNum(t.jumlahTarget)+' '+H(t.satuan)+'</span><strong>'+pJ+'%</strong></div>';
+      html+='<div class="st-progress-wrap"><div class="st-progress-track"><div class="st-progress-fill '+cJ+'" style="width:'+Math.min(pJ,100)+'%"></div></div></div>';
+      if(t.pendapatanTarget){
+        html+='<div class="st-target-row" style="margin-top:10px"><span>Pendapatan: '+fRpS(a.pendapatan)+' / '+fRpS(t.pendapatanTarget)+'</span><strong>'+pP+'%</strong></div>';
+        html+='<div class="st-progress-wrap"><div class="st-progress-track"><div class="st-progress-fill '+cP+'" style="width:'+Math.min(pP,100)+'%"></div></div></div>';
+      }
+      html+='</div>';
+    });
+  }
+  html+='</div></div>';
+  return html;
+}
+
+function attachTargetListeners(){
+  var saveBtn=document.getElementById('st-target-save');
+  if(saveBtn)saveBtn.addEventListener('click',function(){
+    var tan=String(document.getElementById('tf-tan').value||'').trim();
+    var lah=String(document.getElementById('tf-lah').value||'').trim();
+    var per=String(document.getElementById('tf-per').value||'').trim();
+    var jml=parseFloat(document.getElementById('tf-jml').value)||0;
+    var sat=document.getElementById('tf-sat').value;
+    var pend=parseFloat(document.getElementById('tf-pend').value)||0;
+    if(!tan||!per){showToast('Isi tanaman dan periode.');return;}
+    upsertTarget({tanaman:tan,lahan:lah,periode:per,jumlahTarget:jml,satuan:sat,pendapatanTarget:pend});
+    showToast('Target disimpan ✓');renderTab();
+  });
+  var cancelBtn=document.getElementById('st-target-cancel');
+  if(cancelBtn)cancelBtn.addEventListener('click',function(){S.editingTargetId=null;renderTab();});
+}
+
+// ====== RENDER: KALENDER ======
+function getCalEvents(){
+  var ev={};
+  S.records.forEach(function(r){if(!r.tanggal)return;if(!ev[r.tanggal])ev[r.tanggal]={harvests:[],tanam:[],panen:[]};ev[r.tanggal].harvests.push(r);});
+  S.jadwal.forEach(function(j){
+    if(j.tanggalTanam){if(!ev[j.tanggalTanam])ev[j.tanggalTanam]={harvests:[],tanam:[],panen:[]};ev[j.tanggalTanam].tanam.push(j);}
+    if(j.estimasiPanen){if(!ev[j.estimasiPanen])ev[j.estimasiPanen]={harvests:[],tanam:[],panen:[]};ev[j.estimasiPanen].panen.push(j);}
+  });
+  return ev;
+}
+
+function renderKalender(){
+  var y=S.kalYear,m=S.kalMonth;
+  var today=todayISO();
+  var ev=getCalEvents();
+  var firstDay=new Date(y,m,1).getDay();
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var dow=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+  var html='<p class="st-eyebrow">JADWAL TANAM</p><h2 class="st-title">Kalender Pertanian</h2>';
+  html+='<div class="st-legend">';
+  html+='<div class="st-legend-item"><div class="st-kal-dot st-kal-dot-harvest"></div>Panen tercatat</div>';
+  html+='<div class="st-legend-item"><div class="st-kal-dot st-kal-dot-tanam"></div>Jadwal tanam</div>';
+  html+='<div class="st-legend-item"><div class="st-kal-dot st-kal-dot-panen"></div>Estimasi panen</div>';
+  html+='</div>';
+  html+='<div class="st-kal-header">';
+  html+='<button class="st-kal-nav" data-action="kal-prev">&#8592;</button>';
+  html+='<span class="st-kal-month">'+fMonth(y,m)+'</span>';
+  html+='<button class="st-kal-nav" data-action="kal-next">&#8594;</button>';
+  html+='</div>';
+  html+='<div class="st-kal-grid">';
+  dow.forEach(function(d){html+='<div class="st-kal-dow">'+d+'</div>';});
+  for(var i=0;i<firstDay;i++)html+='<div class="st-kal-cell st-kal-empty"></div>';
+  for(var day=1;day<=daysInMonth;day++){
+    var iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    var classes='st-kal-cell';
+    if(iso===today)classes+=' st-kal-today';
+    if(iso===S.kalSelected)classes+=' st-kal-selected';
+    var dayEv=ev[iso]||{harvests:[],tanam:[],panen:[]};
+    var dots='';
+    if(dayEv.harvests.length)dots+='<div class="st-kal-dot st-kal-dot-harvest"></div>';
+    if(dayEv.tanam.length)dots+='<div class="st-kal-dot st-kal-dot-tanam"></div>';
+    if(dayEv.panen.length)dots+='<div class="st-kal-dot st-kal-dot-panen"></div>';
+    html+='<div class="'+classes+'" data-action="kal-select" data-date="'+iso+'"><div class="st-kal-date">'+day+'</div><div class="st-kal-dots">'+dots+'</div></div>';
+  }
+  html+='</div>';
+  html+='<div id="st-kal-detail">'+renderKalDetail(S.kalSelected,ev)+'</div>';
+  return html;
+}
+
+function renderKalDetail(dateStr,ev){
+  if(!dateStr)return'<div class="st-kal-detail" style="color:var(--ink-soft);font-size:14px;text-align:center">Klik tanggal untuk melihat detail dan menambah jadwal</div>';
+  ev=ev||getCalEvents();
+  var dayEv=ev[dateStr]||{harvests:[],tanam:[],panen:[]};
+  var html='<div class="st-kal-detail"><h3>'+fDate(dateStr)+'</h3>';
+  if(!dayEv.harvests.length&&!dayEv.tanam.length&&!dayEv.panen.length){
+    html+='<div style="color:var(--ink-soft);font-size:13px;padding:8px 0">Tidak ada kegiatan pada hari ini.</div>';
+  }
+  dayEv.harvests.forEach(function(r){
+    html+='<div class="st-kal-event"><span class="st-kal-badge st-kal-badge-harvest">Panen</span><div class="st-kal-event-info"><strong>'+H(r.tanaman)+'</strong> — '+H(r.lahan)+' — '+fNum(r.jumlah)+' '+H(r.satuan)+' ('+fRp(pendOf(r))+')'+(r.dicatatOleh?' oleh '+H(r.dicatatOleh):'')+' <button class="st-icon-btn" style="font-size:12px" data-action="edit" data-id="'+r.id+'">✎</button></div></div>';
+  });
+  dayEv.tanam.forEach(function(j){
+    html+='<div class="st-kal-event"><span class="st-kal-badge st-kal-badge-tanam">Tanam</span><div class="st-kal-event-info"><strong>'+H(j.tanaman)+'</strong> — '+H(j.lahan)+(j.catatan?' — '+H(j.catatan):'')+' <small>(est. panen: '+fDate(j.estimasiPanen)+')</small> <button class="st-icon-btn" style="font-size:12px" data-action="del-jadwal" data-id="'+j.id+'" data-confirm="0">🗑</button></div></div>';
+  });
+  dayEv.panen.forEach(function(j){
+    html+='<div class="st-kal-event"><span class="st-kal-badge st-kal-badge-panen">Est. Panen</span><div class="st-kal-event-info"><strong>'+H(j.tanaman)+'</strong> — '+H(j.lahan)+' (tanam: '+fDate(j.tanggalTanam)+')</div></div>';
+  });
+  html+='<button id="st-add-jadwal" class="st-btn st-btn-ghost st-btn-sm" style="margin-top:12px">+ Tambah Jadwal Tanam</button>';
+  if(S.addingJadwal){
+    var tOpts=uniq(S.records,'tanaman');var lOpts=uniq(S.records,'lahan');
+    html+='<div class="st-jadwal-form">';
+    html+='<div class="st-field-row"><div class="st-field"><label>Tanaman</label><input list="dl-tan3" id="jf-tan" placeholder="Tanaman"><datalist id="dl-tan3">'+tOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div>';
+    html+='<div class="st-field"><label>Lahan</label><input list="dl-lah3" id="jf-lah" placeholder="Lahan"><datalist id="dl-lah3">'+lOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div></div>';
+    html+='<div class="st-field-row"><div class="st-field"><label>Tanggal Tanam</label><input type="date" id="jf-tgl" value="'+H(dateStr)+'"></div>';
+    html+='<div class="st-field"><label>Estimasi Panen</label><input type="date" id="jf-est"></div></div>';
+    html+='<div class="st-field"><label>Catatan</label><input type="text" id="jf-cat" placeholder="cth. Varietas, kondisi lahan..."></div>';
+    html+='<div class="st-form-actions"><button id="st-jadwal-save" class="st-btn st-btn-primary st-btn-sm">Simpan Jadwal</button><button id="st-jadwal-cancel" class="st-btn st-btn-ghost st-btn-sm">Batal</button></div>';
+    html+='</div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function attachKalenderListeners(){
+  document.getElementById('st-main').addEventListener('click',function(e){
+    var btn=e.target.closest('[data-action]');if(!btn)return;
+    var action=btn.dataset.action;
+    if(action==='kal-prev'){
+      S.kalMonth--;if(S.kalMonth<0){S.kalMonth=11;S.kalYear--;}
+      S.kalSelected=null;S.addingJadwal=false;renderTab();return;
+    }
+    if(action==='kal-next'){
+      S.kalMonth++;if(S.kalMonth>11){S.kalMonth=0;S.kalYear++;}
+      S.kalSelected=null;S.addingJadwal=false;renderTab();return;
+    }
+    if(action==='kal-select'){
+      var date=btn.dataset.date;
+      S.kalSelected=(S.kalSelected===date)?null:date;
+      S.addingJadwal=false;
+      var detail=document.getElementById('st-kal-detail');
+      if(detail){detail.innerHTML=renderKalDetail(S.kalSelected);}
+      document.querySelectorAll('.st-kal-cell').forEach(function(c){c.classList.toggle('st-kal-selected',c.dataset.date===S.kalSelected);});
+      return;
+    }
+    if(action==='del-jadwal'){
+      if(btn.dataset.confirm==='1'){
+        deleteJadwal(btn.dataset.id);S.addingJadwal=false;
+        var detail2=document.getElementById('st-kal-detail');
+        if(detail2){detail2.innerHTML=renderKalDetail(S.kalSelected);}
+        showToast('Jadwal dihapus');
+      }else{
+        btn.dataset.confirm='1';btn.textContent='Yakin?';btn.classList.add('st-icon-danger');
+        setTimeout(function(){if(btn.isConnected){btn.dataset.confirm='0';btn.textContent='🗑';btn.classList.remove('st-icon-danger');}},3000);
+      }
+      return;
+    }
+  },true); // use capture to intercept before main delegated handler
+}
+
+function attachAddJadwalListener(){
+  var addBtn=document.getElementById('st-add-jadwal');
+  if(addBtn){
+    addBtn.addEventListener('click',function(){
+      S.addingJadwal=true;
+      var detail=document.getElementById('st-kal-detail');
+      if(detail){detail.innerHTML=renderKalDetail(S.kalSelected);}
+      attachSaveJadwalListener();
+    });
+  }
+  attachSaveJadwalListener();
+}
+
+function attachSaveJadwalListener(){
+  var saveBtn=document.getElementById('st-jadwal-save');
+  var cancelBtn=document.getElementById('st-jadwal-cancel');
+  if(saveBtn){
+    saveBtn.addEventListener('click',function(){
+      var tan=String(document.getElementById('jf-tan').value||'').trim();
+      var lah=String(document.getElementById('jf-lah').value||'').trim();
+      var tgl=document.getElementById('jf-tgl').value;
+      var est=document.getElementById('jf-est').value;
+      var cat=String(document.getElementById('jf-cat').value||'').trim();
+      if(!tan||!tgl){showToast('Isi tanaman dan tanggal tanam.');return;}
+      upsertJadwal({tanaman:tan,lahan:lah,tanggalTanam:tgl,estimasiPanen:est,catatan:cat});
+      S.addingJadwal=false;
+      var detail=document.getElementById('st-kal-detail');
+      if(detail){detail.innerHTML=renderKalDetail(S.kalSelected);}
+      showToast('Jadwal tersimpan ✓');attachAddJadwalListener();
+    });
+  }
+  if(cancelBtn){
+    cancelBtn.addEventListener('click',function(){S.addingJadwal=false;var detail=document.getElementById('st-kal-detail');if(detail){detail.innerHTML=renderKalDetail(S.kalSelected);}attachAddJadwalListener();});
+  }
+}
+
+// ====== RENDER: RIWAYAT ======
+function getFiltered(){
+  var list=S.records.slice();
+  var f=S.filters;
+  if(f.q){var q=f.q.toLowerCase();list=list.filter(function(r){return[r.tanaman,r.lahan,r.catatan,r.dicatatOleh].join(' ').toLowerCase().indexOf(q)>-1;});}
+  if(f.tanaman)list=list.filter(function(r){return r.tanaman===f.tanaman;});
+  if(f.lahan)list=list.filter(function(r){return r.lahan===f.lahan;});
+  if(f.from)list=list.filter(function(r){return r.tanggal>=f.from;});
+  if(f.to)list=list.filter(function(r){return r.tanggal<=f.to;});
+  list.sort(function(a,b){
+    var av,bv;
+    if(S.sort.key==='pendapatan'){av=pendOf(a);bv=pendOf(b);}
+    else{av=a[S.sort.key];bv=b[S.sort.key];}
+    if(av<bv)return S.sort.dir==='asc'?-1:1;
+    if(av>bv)return S.sort.dir==='asc'?1:-1;
+    return 0;
+  });
+  return list;
+}
+
+function renderRiwayat(){
+  var tOpts=uniq(S.records,'tanaman');var lOpts=uniq(S.records,'lahan');
+  var gn=S.settings.groupName||'SmartTani';
+  var html='<div class="st-print-header"><h1>Laporan Hasil Panen — '+H(gn)+'</h1><p>Dicetak: '+new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})+'</p></div>';
+  html+='<p class="st-eyebrow">RIWAYAT</p><h2 class="st-title">Riwayat Panen</h2>';
+  html+='<div class="st-filter-bar">';
+  html+='<input type="search" id="st-f-search" placeholder="Cari tanaman, lahan, pencatat..." value="'+H(S.filters.q)+'">';
+  html+='<select id="st-f-tan"><option value="">Semua Tanaman</option>'+tOpts.map(function(o){return'<option value="'+H(o)+'" '+(S.filters.tanaman===o?'selected':'')+'>'+H(o)+'</option>';}).join('')+'</select>';
+  html+='<select id="st-f-lah"><option value="">Semua Lahan</option>'+lOpts.map(function(o){return'<option value="'+H(o)+'" '+(S.filters.lahan===o?'selected':'')+'>'+H(o)+'</option>';}).join('')+'</select>';
+  html+='<input type="date" id="st-f-from" title="Dari tanggal" value="'+H(S.filters.from)+'">';
+  html+='<input type="date" id="st-f-to" title="Sampai tanggal" value="'+H(S.filters.to)+'">';
+  html+='<button id="st-export-csv" class="st-btn st-btn-ghost st-btn-sm">📥 CSV</button>';
+  html+='<button id="st-print-btn" class="st-btn st-btn-ghost st-btn-sm">🖨️ Cetak</button>';
+  html+='</div>';
+  html+='<div id="st-riwayat-results"></div>';
+  return html;
+}
+
+function renderRiwayatResults(){
+  var container=document.getElementById('st-riwayat-results');if(!container)return;
+  var list=getFiltered();
+  if(!list.length){container.innerHTML='<div class="st-empty-state"><h3>Tidak ada catatan</h3><p>Ubah filter atau kata kunci.</p></div>';return;}
+  var rows=list.map(function(r){
+    var p=pendOf(r),u=untOf(r);
+    var photoBtn=r.hasPhoto?'<button class="st-icon-btn" data-action="view-photo" data-id="'+r.id+'" title="Lihat foto">🖼</button>':'';
+    return'<tr><td>'+fDate(r.tanggal)+'</td><td>'+H(r.tanaman)+'</td><td>'+H(r.lahan)+'</td><td class="st-num">'+fNum(r.jumlah)+' '+H(r.satuan)+'</td><td class="st-num">'+fRp(p)+'</td><td class="st-num '+(u<0?'st-neg':'')+'">'+fRp(u)+'</td><td>'+H(r.dicatatOleh||'-')+'</td><td class="st-actions">'+photoBtn+'<button class="st-icon-btn" data-action="edit" data-id="'+r.id+'">✎</button><button class="st-icon-btn" data-action="delete" data-id="'+r.id+'" data-confirm="0">🗑</button></td></tr>';
+  }).join('');
+
+  var cards=list.map(function(r){
+    var p=pendOf(r),u=untOf(r);
+    return'<div class="st-rcard"><div class="st-rcard-top"><div><strong>'+H(r.tanaman)+'</strong><span class="st-rcard-sub">'+H(r.lahan)+' · '+fDate(r.tanggal)+'</span></div><div>'+
+      (r.hasPhoto?'<button class="st-icon-btn" data-action="view-photo" data-id="'+r.id+'">🖼</button>':'')+
+      '<button class="st-icon-btn" data-action="edit" data-id="'+r.id+'">✎</button><button class="st-icon-btn" data-action="delete" data-id="'+r.id+'" data-confirm="0">🗑</button></div></div>'+
+      '<div class="st-rcard-grid"><div><span>Jumlah</span><strong>'+fNum(r.jumlah)+' '+H(r.satuan)+'</strong></div><div><span>Pendapatan</span><strong>'+fRp(p)+'</strong></div><div><span>Untung</span><strong class="'+(u<0?'st-neg':'')+'">'+fRp(u)+'</strong></div><div><span>Dicatat oleh</span><strong>'+H(r.dicatatOleh||'-')+'</strong></div></div>'+
+      (r.catatan?'<p class="st-rcard-note">'+H(r.catatan)+'</p>':'')+
+      '</div>';
+  }).join('');
+
+  container.innerHTML='<div class="st-table-wrap"><table class="st-table"><thead><tr><th data-sort="tanggal">Tanggal</th><th data-sort="tanaman">Tanaman</th><th data-sort="lahan">Lahan</th><th data-sort="jumlah" class="st-num">Jumlah</th><th data-sort="pendapatan" class="st-num">Pendapatan</th><th class="st-num">Untung</th><th>Dicatat oleh</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="st-rcard-list">'+cards+'</div>';
+}
+
+function attachRiwayatListeners(){
+  var q=document.getElementById('st-f-search');
+  var tan=document.getElementById('st-f-tan');
+  var lah=document.getElementById('st-f-lah');
+  var from=document.getElementById('st-f-from');
+  var to=document.getElementById('st-f-to');
+  var exp=document.getElementById('st-export-csv');
+  var prn=document.getElementById('st-print-btn');
+  var timer;
+  if(q)q.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(function(){S.filters.q=q.value;renderRiwayatResults();},200);});
+  if(tan)tan.addEventListener('change',function(){S.filters.tanaman=tan.value;renderRiwayatResults();});
+  if(lah)lah.addEventListener('change',function(){S.filters.lahan=lah.value;renderRiwayatResults();});
+  if(from)from.addEventListener('change',function(){S.filters.from=from.value;renderRiwayatResults();});
+  if(to)to.addEventListener('change',function(){S.filters.to=to.value;renderRiwayatResults();});
+  if(exp)exp.addEventListener('click',exportCSV);
+  if(prn)prn.addEventListener('click',function(){window.print();});
+}
+
+function exportCSV(){
+  var list=getFiltered();
+  var header=['Tanggal','Tanaman','Lahan','Jumlah','Satuan','Biaya Produksi','Harga Jual/Satuan','Total Pendapatan','Keuntungan','Dicatat Oleh','Catatan'];
+  function ce(v){var s=String(v==null?'':v);if(/[",\n]/.test(s))return'"'+s.replace(/"/g,'""')+'"';return s;}
+  var rows=list.map(function(r){return[r.tanggal,r.tanaman,r.lahan,r.jumlah,r.satuan,r.biaya||0,r.hargaJual||0,pendOf(r),untOf(r),r.dicatatOleh||'',(r.catatan||'').replace(/\n/g,' ')].map(ce).join(',');});
+  var csv=[header.map(ce).join(',')].concat(rows).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='smarttani-panen.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ====== TOAST & PHOTO MODAL ======
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById('st-toast');
+  t.textContent=msg;t.hidden=false;
+  requestAnimationFrame(function(){t.classList.add('show');});
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.hidden=true;},300);},2400);
+}
+
+function showPhotoModal(id,caption){
+  loadPhoto(id).then(function(data){
+    if(!data){showToast('Foto tidak tersedia');return;}
+    document.getElementById('st-modal-img').src=data;
+    document.getElementById('st-modal-caption').textContent=caption||'';
+    document.getElementById('st-photo-modal').classList.remove('hidden');
+  });
+}
+
+document.getElementById('st-modal-close').addEventListener('click',function(){document.getElementById('st-photo-modal').classList.add('hidden');});
+document.getElementById('st-photo-modal').addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');});
+
+// ====== NAV & GLOBAL EVENTS ======
+function renderTab(){
+  var main=document.getElementById('st-main');
+  if(S.tab==='dashboard')main.innerHTML=renderDashboard();
+  else if(S.tab==='catat'){main.innerHTML=renderCatatForm();attachFormListeners();}
+  else if(S.tab==='target'){main.innerHTML=renderTarget();attachTargetListeners();}
+  else if(S.tab==='kalender'){main.innerHTML=renderKalender();attachAddJadwalListener();}
+  else if(S.tab==='riwayat'){main.innerHTML=renderRiwayat();renderRiwayatResults();attachRiwayatListeners();}
+  updateNav();
+}
+function updateNav(){
+  document.querySelectorAll('.st-nav-btn').forEach(function(btn){btn.classList.toggle('active',btn.dataset.tab===S.tab);});
+}
+function refreshUserBtn(){
+  var btn=document.getElementById('st-user-btn');
+  var name=(S.profile.name||'').trim();
+  btn.textContent=name?name.split(' ').map(function(p){return p[0];}).slice(0,2).join('').toUpperCase():'…';
+  document.getElementById('st-input-name').value=S.profile.name||'';
+  document.getElementById('st-input-group').value=S.settings.groupName||'';
+}
+
+// Nav buttons
+document.querySelectorAll('.st-nav-btn[data-tab]').forEach(function(btn){
+  btn.addEventListener('click',function(){S.tab=btn.dataset.tab;S.editingId=null;S.addingJadwal=false;renderTab();window.scrollTo({top:0,behavior:'smooth'});});
+});
+
+// Profile popover
+var uBtn=document.getElementById('st-user-btn');
+var uPop=document.getElementById('st-user-popover');
+uBtn.addEventListener('click',function(e){e.stopPropagation();uPop.classList.toggle('open');});
+document.addEventListener('click',function(e){if(!uPop.contains(e.target)&&e.target!==uBtn)uPop.classList.remove('open');});
+document.getElementById('st-save-profile').addEventListener('click',function(){
+  S.profile.name=document.getElementById('st-input-name').value.trim();
+  S.settings.groupName=document.getElementById('st-input-group').value.trim();
+  saveProfile();saveSettings();refreshUserBtn();
+  uPop.classList.remove('open');
+  if(S.tab==='dashboard')renderTab();
+  showToast('Profil disimpan ✓');
+});
+document.getElementById('st-reset-data').addEventListener('click',function(){
+  if(!confirm('Hapus SEMUA data panen kelompok? Tidak bisa dibatalkan.'))return;
+  S.records=[];S.targets=[];S.jadwal=[];
+  saveRecords();saveTargets();saveJadwal();
+  uPop.classList.remove('open');renderTab();showToast('Semua data dihapus');
+});
+
+// Main content delegation
+document.getElementById('st-main').addEventListener('click',function(e){
+  var btn=e.target.closest('[data-action]');if(!btn)return;
+  var action=btn.dataset.action,id=btn.dataset.id;
+
+  if(action==='go-catat'){S.tab='catat';renderTab();return;}
+
+  if(action==='edit'){S.editingId=id;S.tab='catat';renderTab();window.scrollTo({top:0});return;}
+
+  if(action==='delete'){
+    if(btn.dataset.confirm==='1'){
+      deleteRecord(id);
+      if(S.tab==='riwayat')renderRiwayatResults();
+      else renderTab();
+      showToast('Catatan dihapus');
+    }else{
+      btn.dataset.confirm='1';btn.textContent='Yakin?';btn.classList.add('st-icon-danger');
+      setTimeout(function(){if(btn.isConnected){btn.dataset.confirm='0';btn.textContent='🗑';btn.classList.remove('st-icon-danger');}},3000);
+    }
+    return;
+  }
+
+  if(action==='view-photo'){
+    var rec=S.records.filter(function(r){return r.id===id;})[0];
+    showPhotoModal(id,rec?H(rec.tanaman)+' — '+H(rec.lahan)+' ('+fDate(rec.tanggal)+')':'');
+    return;
+  }
+
+  if(action==='edit-target'){S.editingTargetId=id;renderTab();return;}
+  if(action==='del-target'){
+    if(btn.dataset.confirm==='1'){
+      deleteTarget(id);renderTab();showToast('Target dihapus');
+    }else{
+      btn.dataset.confirm='1';btn.textContent='Yakin?';btn.classList.add('st-icon-danger');
+      setTimeout(function(){if(btn.isConnected){btn.dataset.confirm='0';btn.textContent='🗑';btn.classList.remove('st-icon-danger');}},3000);
+    }
+    return;
+  }
+
+  if(action==='del-jadwal'&&S.tab==='riwayat')return; // handled by kalender handler
+
+  var th=e.target.closest('th[data-sort]');
+  if(th){
+    var key=th.dataset.sort;
+    if(S.sort.key===key)S.sort.dir=S.sort.dir==='asc'?'desc':'asc';
+    else{S.sort.key=key;S.sort.dir='asc';}
+    renderRiwayatResults();
+  }
+});
+
+// ====== INIT ======
+loadAll().then(function(){
+  if(!hasStor())document.title='SmartTani (offline)';
+  // Seed dummy data if empty
+  if(!S.records.length&&!S.targets.length){seedDummy();}
+  refreshUserBtn();
+  renderTab();
+});
+
+})();
+</script>
+</body>
+</html>
