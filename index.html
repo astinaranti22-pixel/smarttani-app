@@ -40,6 +40,8 @@ h1,h2,h3{margin:0;font-family:'Fraunces',serif;}
 .st-user-popover input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--paper);}
 .st-popover-divider{height:1px;background:var(--line);margin:4px 0;}
 .st-reset-btn{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;text-align:left;padding:4px 0;font-weight:600;}
+.st-logout-btn{font-size:12px;color:var(--ink-soft);background:none;border:none;cursor:pointer;text-align:left;padding:4px 0;font-weight:600;}
+.st-logout-btn:hover{color:var(--deep);}
 
 .st-nav-mobile{display:none;position:sticky;bottom:0;z-index:30;background:var(--white);border-top:1px solid var(--line);padding:5px 4px calc(5px + env(safe-area-inset-bottom));justify-content:space-around;box-shadow:0 -2px 10px rgba(38,50,31,.08);}
 .st-nav-mobile .st-nav-btn{color:var(--ink-soft);flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:10px;padding:5px 2px;border-radius:10px;}
@@ -94,6 +96,7 @@ textarea{resize:vertical;min-height:64px;}
 .st-btn-ghost:hover{border-color:var(--soil);color:var(--soil);}
 .st-btn-sm{padding:8px 14px;font-size:13px;}
 .st-btn-danger{background:var(--red);color:#fff;}
+.st-btn-block{width:100%;}
 
 /* PHOTO */
 .st-photo-upload{border:2px dashed var(--line);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;}
@@ -213,6 +216,24 @@ table.st-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:90
 .st-modal-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;line-height:1;}
 .st-modal-caption{padding:12px 16px;font-size:13px;color:var(--ink-soft);}
 
+/* LOGIN */
+.st-login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--paper-deep);background-image:radial-gradient(circle at 1px 1px,rgba(38,50,31,.06) 1px,transparent 0);background-size:20px 20px;}
+.st-login-screen.hidden{display:none;}
+.st-login-card{width:100%;max-width:400px;background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:32px 30px;position:relative;overflow:hidden;}
+.st-login-card::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;border:1.5px dashed var(--line);}
+.st-login-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;position:relative;}
+.st-login-brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.st-login-brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--deep);}
+.st-login-brand-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-dark);}
+.st-login-title{font-size:19px;font-weight:600;color:var(--deep);margin-bottom:4px;}
+.st-login-sub{font-size:13px;color:var(--ink-soft);margin:0 0 20px;line-height:1.5;}
+.st-login-form{display:flex;flex-direction:column;gap:14px;}
+.st-login-error{display:none;background:rgba(166,64,43,.09);color:var(--red);border:1px solid rgba(166,64,43,.25);border-radius:9px;padding:10px 12px;font-size:13px;font-weight:600;}
+.st-login-error.show{display:block;}
+.st-login-toggle{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);text-align:center;font-size:13px;color:var(--ink-soft);}
+.st-login-toggle button{background:none;border:none;color:var(--green);font-weight:700;cursor:pointer;padding:0;font-size:13px;text-decoration:underline;}
+.st-login-note{margin-top:16px;font-size:11.5px;color:var(--ink-soft);line-height:1.5;background:var(--paper);border-radius:9px;padding:10px 12px;}
+
 /* PRINT */
 .st-print-header{display:none;}
 @media print{
@@ -250,7 +271,40 @@ table.st-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:90
 </style>
 </head>
 <body>
-<div class="st-app">
+
+<div id="st-login-screen" class="st-login-screen">
+  <div class="st-login-card">
+    <div class="st-login-brand">
+      <svg width="40" height="40" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="20" fill="none" stroke="#D6A23C" stroke-width="1.4" stroke-dasharray="2.4 2.6"/>
+        <circle cx="22" cy="22" r="15.5" fill="none" stroke="#D6A23C" stroke-width="1"/>
+        <path d="M22 30.5c-5.2-1-8.3-5.6-8.3-10.7 0-3 1.2-5.7 2-7.1.6 2 2 4.5 4.2 6.1.3-2.4 1.6-5.1 3.7-6.9 1 2.4 1.2 5.1.6 7.5 1.6-1 3-2.6 3.9-4.5.9 1.7 1.4 3.9 1 6.1-.5 4.9-3.7 8.7-7.1 9.5z" fill="#D6A23C"/>
+      </svg>
+      <div class="st-login-brand-text">
+        <span class="st-login-brand-name">SmartTani</span>
+        <span class="st-login-brand-tag">Catatan Hasil Panen</span>
+      </div>
+    </div>
+    <div id="st-login-title-wrap">
+      <h2 class="st-login-title">Masuk ke akun kelompok</h2>
+      <p class="st-login-sub">Masukkan nama Anda dan kata sandi kelompok tani untuk membuka catatan panen.</p>
+    </div>
+    <div id="st-login-error" class="st-login-error"></div>
+    <form id="st-login-form" class="st-login-form">
+      <div class="st-field"><label for="li-name">Nama Anda</label><input required type="text" id="li-name" placeholder="cth. Budi Santoso" autocomplete="name"></div>
+      <div class="st-field" id="li-group-field"><label for="li-group">Nama Kelompok Tani</label><input required type="text" id="li-group" placeholder="cth. Kelompok Tani Makmur" autocomplete="organization"></div>
+      <div class="st-field"><label for="li-pass">Kata Sandi Kelompok</label><input required type="password" id="li-pass" placeholder="Kata sandi" autocomplete="current-password"></div>
+      <div class="st-field hidden" id="li-pass2-field"><label for="li-pass2">Ulangi Kata Sandi</label><input type="password" id="li-pass2" placeholder="Ulangi kata sandi" autocomplete="new-password"></div>
+      <button type="submit" id="st-login-submit" class="st-btn st-btn-primary st-btn-block">Masuk</button>
+    </form>
+    <div class="st-login-toggle" id="st-login-toggle-wrap">
+      Kelompok Anda belum terdaftar? <button type="button" id="st-login-toggle">Buat akun kelompok baru</button>
+    </div>
+    <div class="st-login-note">Catatan: kata sandi ini dipakai bersama oleh seluruh anggota kelompok tani untuk membuka data panen di perangkat ini.</div>
+  </div>
+</div>
+
+<div id="st-app" class="st-app hidden">
 
 <header class="st-header">
   <div class="st-brand">
@@ -275,9 +329,10 @@ table.st-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:90
     <button id="st-user-btn" class="st-user-btn" title="Profil">…</button>
     <div id="st-user-popover" class="st-user-popover">
       <div><label for="st-input-name">Nama Anda</label><input id="st-input-name" type="text" placeholder="cth. Budi Santoso"></div>
-      <div><label for="st-input-group">Nama Kelompok Tani</label><input id="st-input-group" type="text" placeholder="cth. Kelompok Tani Makmur"></div>
+      <div><label for="st-input-group">Nama Kelompok Tani</label><input id="st-input-group" type="text" placeholder="cth. Kelompok Tani Makmur" disabled></div>
       <button id="st-save-profile" class="st-btn st-btn-primary st-btn-sm">Simpan Profil</button>
       <div class="st-popover-divider"></div>
+      <button id="st-logout" class="st-logout-btn">↩ Keluar</button>
       <button id="st-reset-data" class="st-reset-btn">⚠ Hapus semua data panen…</button>
     </div>
   </div>
@@ -318,7 +373,8 @@ var S = {
   kalYear:new Date().getFullYear(),kalMonth:new Date().getMonth(),
   kalSelected:null,
   storageOk:true,pendingPhoto:null,
-  addingJadwal:false
+  addingJadwal:false,
+  auth:{loggedIn:false,mode:'login'}
 };
 
 // ====== HELPERS ======
@@ -334,6 +390,12 @@ function uniq(arr,key){var s={};arr.forEach(function(r){if(r[key])s[r[key]]=1;})
 function pendOf(r){return(r.jumlah||0)*(r.hargaJual||0);}
 function untOf(r){return pendOf(r)-(r.biaya||0);}
 function pct(a,b){if(!b)return 0;return Math.min(Math.round(a/b*100),999);}
+function slugGroup(name){return String(name||'').trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');}
+function simpleHash(str){ // not cryptographic - just a lightweight demo obfuscation
+  var h=0;str=String(str);
+  for(var i=0;i<str.length;i++){h=((h<<5)-h+str.charCodeAt(i))|0;}
+  return'h'+Math.abs(h).toString(36)+str.length;
+}
 
 // ====== STORAGE ======
 function hasStor(){return typeof window.storage!=='undefined'&&window.storage;}
@@ -357,6 +419,15 @@ function savePhoto(id,data){if(hasStor())window.storage.set('smt-photo-'+id,data
 function loadPhoto(id){if(!hasStor())return Promise.resolve(null);return window.storage.get('smt-photo-'+id,true).then(function(r){return r?r.value:null;}).catch(function(){return null;});}
 function deletePhoto(id){if(hasStor())window.storage.delete('smt-photo-'+id,true).catch(function(){});}
 
+function accountKey(groupSlug){return'smt-account-'+groupSlug;}
+function loadAccount(groupSlug){
+  if(!hasStor())return Promise.resolve(null);
+  return window.storage.get(accountKey(groupSlug),true).then(function(r){
+    try{return r?JSON.parse(r.value):null;}catch(e){return null;}
+  }).catch(function(){return null;});
+}
+function saveAccount(groupSlug,data){if(hasStor())return window.storage.set(accountKey(groupSlug),JSON.stringify(data),true);return Promise.resolve();}
+
 // ====== PHOTO RESIZE ======
 function resizePhoto(file,cb){
   var fr=new FileReader();
@@ -376,7 +447,6 @@ function resizePhoto(file,cb){
 
 // ====== DUMMY DATA ======
 function seedDummy(){
-  S.settings.groupName='Kelompok Tani Sumber Makmur';
   var seed=[
     {tanggal:'2026-01-15',tanaman:'Padi',lahan:'Sawah Utara',jumlah:1200,satuan:'kg',biaya:800000,hargaJual:5500,dicatatOleh:'Budi Santoso',catatan:'Kualitas baik, cuaca mendukung'},
     {tanggal:'2026-01-28',tanaman:'Cabai Merah',lahan:'Petak A1',jumlah:85,satuan:'kg',biaya:350000,hargaJual:35000,dicatatOleh:'Siti Rahayu',catatan:'Harga pasar naik'},
@@ -411,7 +481,7 @@ function seedDummy(){
     {id:uid(),tanaman:'Tomat',lahan:'Sawah Utara',tanggalTanam:'2026-06-28',estimasiPanen:'2026-08-28',catatan:''},
   ];
 
-  saveRecords();saveTargets();saveJadwal();saveSettings();
+  saveRecords();saveTargets();saveJadwal();
 }
 
 // ====== UPSERT / DELETE ======
@@ -565,7 +635,6 @@ function attachFormListeners(){
   var editing=S.editingId?S.records.filter(function(r){return r.id===S.editingId;})[0]:null;
   S.pendingPhoto=null;
 
-  // Load existing photo if editing
   if(editing&&editing.hasPhoto){
     loadPhoto(editing.id).then(function(data){
       if(data){
@@ -576,7 +645,6 @@ function attachFormListeners(){
     });
   }
 
-  // Preview calc
   function updatePreview(){
     var jml=parseFloat(document.getElementById('f-jml').value)||0;
     var biaya=parseFloat(document.getElementById('f-biaya').value)||0;
@@ -590,7 +658,6 @@ function attachFormListeners(){
   ['f-jml','f-biaya','f-harga'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',updatePreview);});
   updatePreview();
 
-  // Photo upload
   var fotoInput=document.getElementById('f-foto');
   if(fotoInput){
     fotoInput.addEventListener('change',function(){
@@ -607,7 +674,6 @@ function attachFormListeners(){
     });
   }
 
-  // Photo remove (existing photo)
   var rmBtn=document.getElementById('photo-remove');
   if(rmBtn)rmBtn.addEventListener('click',function(){
     S.pendingPhoto=null;
@@ -616,11 +682,9 @@ function attachFormListeners(){
     if(fotoInput)fotoInput.value='';
   });
 
-  // Cancel edit
   var cancelBtn=document.getElementById('st-cancel-edit');
   if(cancelBtn)cancelBtn.addEventListener('click',function(){S.editingId=null;renderTab();});
 
-  // Submit
   form.addEventListener('submit',function(e){
     e.preventDefault();
     var fd=new FormData(form);
@@ -641,7 +705,6 @@ function attachFormListeners(){
     var wasEditing=!!S.editingId;
     var prevId=S.editingId;
     upsertRecord(data);
-    // Save photo
     var newId=wasEditing?prevId:S.records[S.records.length-1].id;
     if(S.pendingPhoto)savePhoto(newId,S.pendingPhoto);
     else if(wasEditing&&!S.pendingPhoto)deletePhoto(newId);
@@ -660,7 +723,6 @@ function renderTarget(){
   var ed=editing||{tanaman:'',lahan:'',periode:new Date().getFullYear().toString(),jumlahTarget:'',satuan:'kg',pendapatanTarget:''};
   var html='<p class="st-eyebrow">TARGET &amp; REALISASI</p><h2 class="st-title">Target Panen</h2>';
   html+='<div class="st-target-layout">';
-  // Form
   html+='<div class="st-target-form">';
   html+='<h3 class="st-subtitle">'+(editing?'Ubah Target':'Tambah Target')+'</h3>';
   html+='<div class="st-field"><label>Tanaman</label><input list="dl-tan2" id="tf-tan" placeholder="cth. Padi" value="'+H(ed.tanaman)+'"><datalist id="dl-tan2">'+tOpts.map(function(o){return'<option value="'+H(o)+'">';}).join('')+'</datalist></div>';
@@ -671,7 +733,6 @@ function renderTarget(){
   html+='<div class="st-form-actions"><button id="st-target-save" class="st-btn st-btn-primary st-btn-sm">'+(editing?'Simpan Perubahan':'Tambah Target')+'</button>';
   if(editing)html+='<button id="st-target-cancel" class="st-btn st-btn-ghost st-btn-sm">Batal</button>';
   html+='</div></div>';
-  // List
   html+='<div class="st-target-list" id="st-target-list">';
   if(!S.targets.length){html+='<div class="st-empty-state" style="padding:30px 10px"><h3>Belum ada target</h3><p>Tambahkan target panen di sebelah kiri.</p></div>';}
   else{
@@ -830,7 +891,7 @@ function attachKalenderListeners(){
       }
       return;
     }
-  },true); // use capture to intercept before main delegated handler
+  },true);
 }
 
 function attachAddJadwalListener(){
@@ -1016,8 +1077,7 @@ uBtn.addEventListener('click',function(e){e.stopPropagation();uPop.classList.tog
 document.addEventListener('click',function(e){if(!uPop.contains(e.target)&&e.target!==uBtn)uPop.classList.remove('open');});
 document.getElementById('st-save-profile').addEventListener('click',function(){
   S.profile.name=document.getElementById('st-input-name').value.trim();
-  S.settings.groupName=document.getElementById('st-input-group').value.trim();
-  saveProfile();saveSettings();refreshUserBtn();
+  saveProfile();refreshUserBtn();
   uPop.classList.remove('open');
   if(S.tab==='dashboard')renderTab();
   showToast('Profil disimpan ✓');
@@ -1027,6 +1087,10 @@ document.getElementById('st-reset-data').addEventListener('click',function(){
   S.records=[];S.targets=[];S.jadwal=[];
   saveRecords();saveTargets();saveJadwal();
   uPop.classList.remove('open');renderTab();showToast('Semua data dihapus');
+});
+document.getElementById('st-logout').addEventListener('click',function(){
+  uPop.classList.remove('open');
+  doLogout();
 });
 
 // Main content delegation
@@ -1068,7 +1132,7 @@ document.getElementById('st-main').addEventListener('click',function(e){
     return;
   }
 
-  if(action==='del-jadwal'&&S.tab==='riwayat')return; // handled by kalender handler
+  if(action==='del-jadwal'&&S.tab==='riwayat')return;
 
   var th=e.target.closest('th[data-sort]');
   if(th){
@@ -1079,14 +1143,138 @@ document.getElementById('st-main').addEventListener('click',function(e){
   }
 });
 
-// ====== INIT ======
-loadAll().then(function(){
-  if(!hasStor())document.title='SmartTani (offline)';
-  // Seed dummy data if empty
-  if(!S.records.length&&!S.targets.length){seedDummy();}
+// ====== LOGIN LOGIC ======
+var loginScreenEl=document.getElementById('st-login-screen');
+var appEl=document.getElementById('st-app');
+var loginForm=document.getElementById('st-login-form');
+var loginError=document.getElementById('st-login-error');
+var loginTitleWrap=document.getElementById('st-login-title-wrap');
+var loginSubmitBtn=document.getElementById('st-login-submit');
+var loginToggleBtn=document.getElementById('st-login-toggle');
+var loginToggleWrap=document.getElementById('st-login-toggle-wrap');
+var pass2Field=document.getElementById('li-pass2-field');
+var groupField=document.getElementById('li-group-field');
+var groupInput=document.getElementById('li-group');
+var nameInput=document.getElementById('li-name');
+var passInput=document.getElementById('li-pass');
+var pass2Input=document.getElementById('li-pass2');
+
+function setLoginMode(mode){
+  S.auth.mode=mode;
+  loginError.classList.remove('show');
+  if(mode==='register'){
+    loginTitleWrap.querySelector('.st-login-title').textContent='Buat akun kelompok baru';
+    loginTitleWrap.querySelector('.st-login-sub').textContent='Daftarkan kelompok tani Anda dan buat kata sandi bersama untuk mengakses catatan panen.';
+    loginSubmitBtn.textContent='Daftar & Masuk';
+    pass2Field.classList.remove('hidden');
+    pass2Input.required=true;
+    loginToggleWrap.innerHTML='Sudah punya akun kelompok? <button type="button" id="st-login-toggle">Masuk di sini</button>';
+  }else{
+    loginTitleWrap.querySelector('.st-login-title').textContent='Masuk ke akun kelompok';
+    loginTitleWrap.querySelector('.st-login-sub').textContent='Masukkan nama Anda dan kata sandi kelompok tani untuk membuka catatan panen.';
+    loginSubmitBtn.textContent='Masuk';
+    pass2Field.classList.add('hidden');
+    pass2Input.required=false;
+    loginToggleWrap.innerHTML='Kelompok Anda belum terdaftar? <button type="button" id="st-login-toggle">Buat akun kelompok baru</button>';
+  }
+  document.getElementById('st-login-toggle').addEventListener('click',function(){
+    setLoginMode(S.auth.mode==='login'?'register':'login');
+  });
+}
+setLoginMode('login');
+
+function showLoginError(msg){
+  loginError.textContent=msg;
+  loginError.classList.add('show');
+}
+
+function doLogout(){
+  S.auth.loggedIn=false;
+  S.profile={name:''};S.settings={groupName:''};
+  S.records=[];S.targets=[];S.jadwal=[];
+  appEl.classList.add('hidden');
+  loginScreenEl.classList.remove('hidden');
+  passInput.value='';pass2Input.value='';
+  setLoginMode('login');
+}
+
+function enterApp(){
+  loginScreenEl.classList.add('hidden');
+  appEl.classList.remove('hidden');
   refreshUserBtn();
+  if(!S.records.length&&!S.targets.length){seedDummy();}
   renderTab();
+}
+
+loginForm.addEventListener('submit',function(e){
+  e.preventDefault();
+  loginError.classList.remove('show');
+  var name=nameInput.value.trim();
+  var group=groupInput.value.trim();
+  var pass=passInput.value;
+  var pass2=pass2Input.value;
+  if(!name||!group||!pass){showLoginError('Lengkapi semua kolom.');return;}
+  var slug=slugGroup(group);
+  if(!slug){showLoginError('Nama kelompok tidak valid.');return;}
+
+  if(!hasStor()){
+    // No persistent storage available: allow entry without account check
+    S.profile.name=name;S.settings.groupName=group;S.auth.loggedIn=true;
+    saveProfile();saveSettings();
+    loadAll().then(enterApp);
+    return;
+  }
+
+  if(S.auth.mode==='register'){
+    if(pass!==pass2){showLoginError('Kata sandi tidak sama.');return;}
+    if(pass.length<4){showLoginError('Kata sandi minimal 4 karakter.');return;}
+    loginSubmitBtn.disabled=true;
+    loadAccount(slug).then(function(existing){
+      if(existing){
+        showLoginError('Kelompok ini sudah terdaftar. Silakan masuk.');
+        loginSubmitBtn.disabled=false;
+        setLoginMode('login');
+        groupInput.value=group;
+        return;
+      }
+      return saveAccount(slug,{groupName:group,passHash:simpleHash(pass),createdAt:Date.now()}).then(function(){
+        S.profile.name=name;S.settings.groupName=group;S.auth.loggedIn=true;
+        saveProfile();saveSettings();
+        return loadAll();
+      }).then(function(){
+        if(S.auth.loggedIn){enterApp();}
+        loginSubmitBtn.disabled=false;
+      });
+    }).catch(function(){showLoginError('Terjadi kesalahan. Coba lagi.');loginSubmitBtn.disabled=false;});
+  }else{
+    loginSubmitBtn.disabled=true;
+    loadAccount(slug).then(function(existing){
+      if(!existing){
+        showLoginError('Kelompok belum terdaftar. Silakan buat akun baru.');
+        loginSubmitBtn.disabled=false;
+        return;
+      }
+      if(existing.passHash!==simpleHash(pass)){
+        showLoginError('Kata sandi salah.');
+        loginSubmitBtn.disabled=false;
+        return;
+      }
+      S.profile.name=name;S.settings.groupName=existing.groupName||group;S.auth.loggedIn=true;
+      saveProfile();saveSettings();
+      loadAll().then(function(){
+        enterApp();
+        loginSubmitBtn.disabled=false;
+      });
+    }).catch(function(){showLoginError('Terjadi kesalahan. Coba lagi.');loginSubmitBtn.disabled=false;});
+  }
 });
+
+// Prefill name if a previous profile exists locally, without auto-login
+if(hasStor()){
+  window.storage.get('smt-profile',false).then(function(r){
+    try{var p=r?JSON.parse(r.value):null;if(p&&p.name)nameInput.value=p.name;}catch(e){}
+  }).catch(function(){});
+}
 
 })();
 </script>
